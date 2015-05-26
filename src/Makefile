@@ -1,6 +1,6 @@
 CC	=	gcc
 STRIP	=	strip
-CFLAGS	=	-O2
+CFLAGS	=	-O2 -Wall
 LDFLAGS	=	-lusb
 RM	=	rm -f
 CP	=	cp
