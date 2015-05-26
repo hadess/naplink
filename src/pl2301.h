@@ -37,6 +37,8 @@
 #define PROLIFIC_VENDOR_ID          0x067b
 #define PL2301_DEVICE_ID            0x0000
 #define PL2302_DEVICE_ID            0x0001
+#define BELKIN_VENDOR_ID            0x050d
+#define BELKIN_VISTA_DEVICE_ID      0x258a
 
 #define PEER_E    0x01 /* bit0 - Peer Exists */
 #define TX_REQ    0x02 /* bit1 - Transfer Request */

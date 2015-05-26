@@ -468,7 +468,7 @@ int main(void)
 
   for (bus = usb_busses; bus; bus = bus->next) {
       for (dev = bus->devices; dev; dev = dev->next)
-	  if (dev->descriptor.idVendor == PROLIFIC_VENDOR_ID)
+	  if (dev->descriptor.idVendor == PROLIFIC_VENDOR_ID) {
 	      switch (dev->descriptor.idProduct) {
 	      case PL2301_DEVICE_ID:
 		  printf("Found a PL2301\n");
@@ -484,6 +484,18 @@ int main(void)
 		  printf("Found an unknown Prolific device (id %d)\n", dev->descriptor.idProduct);
 		  break;
 	      }
+	  } else if (dev->descriptor.idVendor == BELKIN_VENDOR_ID) {
+	      switch (dev->descriptor.idProduct) {
+	      case BELKIN_VISTA_DEVICE_ID:
+		  printf ("Found a Belkin Vista\n");
+		  pl_bus = bus;
+		  pl_dev = dev;
+		  break;
+	      default:
+		  printf("Found an unknown Belkin device (id %d)\n", dev->descriptor.idProduct);
+		  break;
+	      }
+	  }
   }
   
   if ((!pl_bus)||(!pl_dev)) {
