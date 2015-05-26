@@ -82,7 +82,7 @@ typedef struct {
 
 #define PACKET_RETURN     0x204d704e
 
-int recv_packet(usb_dev_handle *hnd, packet_header_t *ph, void **pb);
-int send_packet(usb_dev_handle *hnd, packet_header_t *ph, void *pb);
+void recv_packet(usb_dev_handle *hnd, packet_header_t *ph, void **pb);
+void send_packet(usb_dev_handle *hnd, packet_header_t *ph, void *pb);
 
 #endif

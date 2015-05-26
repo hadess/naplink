@@ -34,6 +34,7 @@
 #include <sys/stat.h>
 #include <sys/time.h>
 #include <unistd.h>
+#include <string.h>
 #include <fcntl.h>
 #include <usb.h>
 
@@ -49,6 +50,8 @@ int commandWaiting = 0;
 char *commandBuffer = 0;
 int bail = 0;
 int benchmarking = 0;
+
+static int recv_and_process_packet(usb_dev_handle *hnd);
 
 /* get return value from target */
 int get_return(usb_dev_handle *hnd, void *data)
@@ -140,7 +143,7 @@ int do_execiop(usb_dev_handle *hnd, char *filename)
 }
 
 /* send return value packet to target */
-int do_return(usb_dev_handle *hnd, int rv, void *data, int count)
+void do_return(usb_dev_handle *hnd, int rv, void *data, int count)
 {
     packet_header_t ph;
     return_data_t *pb;
@@ -161,7 +164,7 @@ int do_return(usb_dev_handle *hnd, int rv, void *data, int count)
 }
 
 /* perform a transfer rate test */
-int do_benchmark(usb_dev_handle *hnd)
+void do_benchmark(usb_dev_handle *hnd)
 {
     int i = 0;
     packet_header_t ph;
@@ -193,7 +196,7 @@ int do_benchmark(usb_dev_handle *hnd)
 }
 
 /* receive and process a packet from target */
-int recv_and_process_packet(usb_dev_handle *hnd)
+static int recv_and_process_packet(usb_dev_handle *hnd)
 {
     char *buffer = 0;
     packet_header_t packet;

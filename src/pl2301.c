@@ -38,7 +38,7 @@ extern uid_t loseruser;
 /* check status of a quicklink feature */
 unsigned char CHECK_QLF(usb_dev_handle *hnd, int feature)
 {
-    unsigned char blah = 0;
+    char blah = 0;
     int foo = -1;
 
     seteuid(superuser);

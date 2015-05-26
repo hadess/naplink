@@ -40,7 +40,7 @@ extern uid_t loseruser;
 /* #define DEBUG */
 
 /* receive a packet */
-int recv_packet(usb_dev_handle *hnd, packet_header_t *ph, void **pb)
+void recv_packet(usb_dev_handle *hnd, packet_header_t *ph, void **pb)
 {
 #ifdef DEBUG
     printf("Waiting for PS2 to set TX_REQ...\n");
@@ -83,7 +83,7 @@ int recv_packet(usb_dev_handle *hnd, packet_header_t *ph, void **pb)
 }
 
 /* send a packet */
-int send_packet(usb_dev_handle *hnd, packet_header_t *ph, void *pb)
+void send_packet(usb_dev_handle *hnd, packet_header_t *ph, void *pb)
 {
 #ifdef DEBUG
     printf("Waiting for TX_RDY...\n");
