@@ -470,12 +470,12 @@ int main(void)
       for (dev = bus->devices; dev; dev = dev->next)
 	  if (dev->descriptor.idVendor == PROLIFIC_VENDOR_ID)
 	      switch (dev->descriptor.idProduct) {
-	      case 0:
+	      case PL2301_DEVICE_ID:
 		  printf("Found a PL2301\n");
 		  pl_bus = bus;
 		  pl_dev = dev;
 		  break;
-	      case 1:
+	      case PL2302_DEVICE_ID:
 		  printf("Found a PL2302\n");
 		  pl_bus = bus;
 		  pl_dev = dev;
