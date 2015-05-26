@@ -1,0 +1,137 @@
+                                                      _ __ ___ ____ ______
+- -- --- ---- --------------------------------------\ \\\_\\__\\___\\_____\
+          /\___ ___  /\________/\______  /\______/\___ /\____ _____
+         \\    \   \_\  _  \\_    _    \_\  _    \    \\     \     \
+         /         /    /    /    /    /    /    /    /            /
+        /         /         /         /         /    /            /
+       /   _     /         /     ____/         /    /            /
+       \\___\___/\___/____/     /-DzG\___/____/    \\___/___/___/
+______ ____ ___ __ _    _/     /            \\___________/
+\_____\\___\\__\\_\\\ \-\_____/--[ Presents ]---------------- ---- --- -- -
+                        (__)                   (__)
+[ Information ]---------------------------------------------- ---- --- -- -
+  [ Title .............................................. NapLink v1.0.1 ]
+  [ Date ................................................... 2001-11-28 ]
+  [ What ........ Software to execute code on PS2 using a USB-USB cable ]
+  [ Platform .................................................... Linux ]
+  [ Code .......................................................... ADK ]
+  [ Gfx ........................................................... N/A ]
+  [ Muzak ......................................................... N/A ]
+  [ Homepage .................................. http://www.napalm-x.com ]
+  [ Contact ...................................... andrewk@napalm-x.com ]
+                                                       _ __ ___ ____ ______
+- -- --- ---- --------------------------------------/ ///_//__//___//_____/
+                        (__)                   (__)
+                        (__)                   (__)
+[ Notes ]---------------------------------------------------- ---- --- -- -
+
+  NapLink is a program which allows you to upload code from a PC and
+  execute it on a PS2 using a Prolific PL-2301 or PL-2302 USB to USB cable.
+  It also provides host filesystem access (and printf) and an exception
+  handler for when your code inevitably goes horribly wrong.
+ 
+  What you have here is the Linux NapLink client. You will need to get the
+  NapLink target too (the part that runs on the PS2). There is a Win32
+  NapLink client also, in case you need or want that. 
+
+  Source for the NapLink client is included; you need to build it and install
+  it on your system. It may work on *BSD, but that is untested. If you get
+  it to work on BSD (or some other OS), please let us know! 
+
+  This NapLink client is covered by the license included in LICENSE and in
+  each source file.
+
+- -- --- ---- --------------------------------------/ ///_//__//___//_____/
+                        (__)                   (__)
+                        (__)                   (__)
+[ History ]-------------------------------------------------- ---- --- -- -
+
+  v1.0.0 - 2001-11-12 - Initial release.
+  v1.0.1 - 2001-11-28 - Added benchmark command (requires target v1.0.1)
+                                                       _ __ ___ ____ ______
+- -- --- ---- --------------------------------------/ ///_//__//___//_____/
+                        (__)                   (__)
+                        (__)                   (__)
+[ Usage ]---------------------------------------------------- ---- --- -- -
+
+
+ Building:
+
+  If you have the Linux kernel module for Prolific USB to USB cables loaded
+  (named usbnet in recent kernels) you must remove it prior to using NapLink.
+  If you have it built into your kernel, you will have to rebuild.
+
+  Get and install libusb-0.1.4 or newer from http://libusb.sourceforge.net.
+ 
+  Run the test program included with libusb to check if it works - it should
+  print the vendor and product ids of the usb devices it finds. If it doesn't 
+  work, figure out why, and fix it.
+
+  If it does, edit the Makefile - you will want to change INSTDIR to point
+  to where you want NapLink installed.
+
+  Run make. You should end up with a NapLink binary. 
+
+  Become superuser. Run make install. You should now have a setuid root
+  NapLink binary installed in INSTDIR. NapLink must be setuid root. If you 
+  do not trust it - read the source.
+
+
+ Using:
+
+  Boot the NapLink target on the PS2. Start the NapLink client.
+  
+  As stated above, NapLink must be setuid root.
+
+  NapLink is known to work with recent versions of Linux - 2.4.10 and 2.2.19
+  are both tested. As noted above, you must not have the Prolific driver 
+  (usbnet) built into your kernel or loaded as a module when using NapLink.
+
+  NapLink accepts 6 commands:
+
+  help      - prints brief help message. Use help <command> for more help.
+
+  reset     - instructs NapLink to reset itself. Necessary to run another
+              EE program after starting one. Will not work if you crash 
+              the IOP or EE badly. Generally will work if the exception
+              handler catches the problem, although not always.
+
+  execee    - instructs NapLink to execute a program on the EE. If there
+              is already a program running, this command will be ignored.
+
+              example: execee host:/napalm/kicksass.elf
+
+  execiop   - instructs NapLink to execute a program on the IOP.
+
+              example: execiop host:/the/iop/rocks.irx
+
+  benchmark - tests transfer speed and prints results in bytes/second.
+              Should take around 12-13 seconds to run and produce a result 
+              of approximately 330000 bytes/second.
+
+  exit      - exits the program and sets the USB to USB cable to indicate
+              the PC is no longer present. (You may use quit instead of exit
+              if it makes you happy). BE SURE TO EXIT THIS WAY, AND NOT
+              WITH CONTROL-C ! If you DO end up exiting with control-c, be 
+              absolutely sure NapLink is running on the pc BEFORE you boot it
+              on the PS2 next time, or the PS2 side may become confused and 
+              unresponsive until you reboot it.
+
+
+  The NapLink client is known to be a bit quirky - sometimes it doesn't 
+  notice the PS2; hitting control-c and restarting NapLink (the client) should 
+  fix this (try a couple of times if necessary). This is the ONLY time you
+  should exit NapLink with control-c.
+
+  Due to the way NapLink works, there will be a delay of up to 1 second from 
+  the time you input a command to the time it is executed.
+
+                                                       _ __ ___ ____ ______
+- -- --- ---- --------------------------------------/ ///_//__//___//_____/
+                        (__)                   (__)
+                        (__)                   (__)
+[ Greets ]--------------------------------------------------- ---- --- -- -
+
+                                   You !
+                                                       _ __ ___ ____ ______
+- -- --- ---- --------------------------------------/ ///_//__//___//_____/

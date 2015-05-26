@@ -1,0 +1,22 @@
+       /\___ ___ _/\______ /\____ _____   |/
+ .----\\    \  \\_   _    \\     \     \--.-
+ |    /         /    /    /            / /|\
+ |   /   _     /     ____/            /   |
+ `---\\___\___/\____/-DzG\\__/___/___/----'
+  //-Presents-//   ______________________
+._________________/ -[ NapLink v1.0.1 ]- \_.
+|                                          |
+|  [ Upload and execute programs on PS2 ]  |
+|                                          |
+| This software allows uploading and       |
+| executing code on a PS2 running NapLink. |
+|                                          |
+| Requires:                                |
+|  * PS2 running the NapLink target        |
+|  * Prolific PL-2301 or PL-2302 USB to    |
+|    USB cable                             |
+|  * Recent Linux kernel with USB working  |
+|  * libusb 0.1.4 (or 0.1.3b)              |
+|  * May work with *BSD (untested)         |
+|                                          |
+`----------------------------- [ Linux ] --'
