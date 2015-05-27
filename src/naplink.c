@@ -508,6 +508,9 @@ int main(void)
 /* open device */
   libusb_open(pl_dev, &pl_hnd);
 
+  if(libusb_kernel_driver_active(pl_hnd, 0))
+    libusb_detach_kernel_driver(pl_hnd, 0);
+
   libusb_reset_device(pl_hnd);
 
   libusb_set_configuration(pl_hnd, 1);
