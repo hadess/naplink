@@ -32,7 +32,9 @@
 #ifndef __PL2301_H__
 #define __PL2301_H__
 
-#include <usb.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include <libusb-1.0/libusb.h>
 
 #define PROLIFIC_VENDOR_ID          0x067b
 #define PL2301_DEVICE_ID            0x0000
@@ -50,12 +52,12 @@
 #define S_EN      0x80 /* bit7 - Suspend Enable */
 
 /* clear a feature in quicklink features */
-#define CLEAR_QLF(hnd, feature) seteuid(superuser); while(usb_control_msg(hnd, USB_TYPE_VENDOR | USB_RECIP_INTERFACE, USB_REQ_CLEAR_FEATURE, feature, 0, 0, 0, 10000) < 0); seteuid(loseruser);
+#define CLEAR_QLF(hnd, feature) seteuid(superuser); while(libusb_control_transfer(hnd, LIBUSB_REQUEST_TYPE_VENDOR | LIBUSB_RECIPIENT_INTERFACE, LIBUSB_REQUEST_CLEAR_FEATURE, feature, 0, 0, 0, 10000) < 0); seteuid(loseruser);
 
 /* set a feature in quicklink features */
-#define SET_QLF(hnd, feature) seteuid(superuser); while(usb_control_msg(hnd, USB_TYPE_VENDOR | USB_RECIP_INTERFACE, USB_REQ_SET_FEATURE, feature, 0, 0, 0, 10000) < 0); seteuid(loseruser);
+#define SET_QLF(hnd, feature) seteuid(superuser); while(libusb_control_transfer(hnd, LIBUSB_REQUEST_TYPE_VENDOR | LIBUSB_RECIPIENT_INTERFACE, LIBUSB_REQUEST_SET_FEATURE, feature, 0, 0, 0, 10000) < 0); seteuid(loseruser);
 
 /* check status of a feature in quicklink features */
-unsigned char CHECK_QLF(usb_dev_handle *hnd, int feature);
+unsigned char CHECK_QLF(libusb_device_handle *hnd, int feature);
 
 #endif

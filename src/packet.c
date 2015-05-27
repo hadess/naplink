@@ -29,7 +29,8 @@
  *
  */
 
-#include <usb.h>
+#include <stdlib.h>
+#include <libusb-1.0/libusb.h>
 
 #include "packet.h"
 #include "pl2301.h"
@@ -40,8 +41,9 @@ extern uid_t loseruser;
 /* #define DEBUG */
 
 /* receive a packet */
-void recv_packet(usb_dev_handle *hnd, packet_header_t *ph, void **pb)
+void recv_packet(libusb_device_handle *hnd, packet_header_t *ph, void **pb)
 {
+    int transferred;
 #ifdef DEBUG
     printf("Waiting for PS2 to set TX_REQ...\n");
 #endif
@@ -58,12 +60,12 @@ void recv_packet(usb_dev_handle *hnd, packet_header_t *ph, void **pb)
 
     seteuid(superuser);
     /* receive packet header */
-    usb_bulk_read(hnd, 0x83, (char *)ph, 8, 10000);
+    libusb_bulk_transfer(hnd, 0x83, (unsigned char *)ph, 8, &transferred, 10000);
 
     /* receive packet body */
     if (ph->size) {
 	*pb = malloc(ph->size);
-	usb_bulk_read(hnd, 0x83, *pb, ph->size, 10000);
+	libusb_bulk_transfer(hnd, 0x83, *pb, ph->size, &transferred, 10000);
     }	
     seteuid(loseruser);
 
@@ -83,8 +85,10 @@ void recv_packet(usb_dev_handle *hnd, packet_header_t *ph, void **pb)
 }
 
 /* send a packet */
-void send_packet(usb_dev_handle *hnd, packet_header_t *ph, void *pb)
+void send_packet(libusb_device_handle *hnd, packet_header_t *ph, void *pb)
 {
+    int transferred;
+
 #ifdef DEBUG
     printf("Waiting for TX_RDY...\n");
 #endif
@@ -108,10 +112,10 @@ void send_packet(usb_dev_handle *hnd, packet_header_t *ph, void *pb)
 
     seteuid(superuser);
     /* send bulk */
-    usb_bulk_write(hnd, 0x02, (char *)ph, 8, 10000);
+    libusb_bulk_transfer(hnd, 0x02, (unsigned char *)ph, 8, &transferred, 10000);
 
     if (ph->size)
-	usb_bulk_write(hnd, 0x02, pb, ph->size, 10000);
+	libusb_bulk_transfer(hnd, 0x02, pb, ph->size, &transferred, 10000);
     seteuid(loseruser);
 
     /* set TX_C */

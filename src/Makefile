@@ -1,7 +1,7 @@
 CC	=	gcc
 STRIP	=	strip
 CFLAGS	=	-O2 -Wall
-LDFLAGS	=	-lusb
+LDFLAGS	=	-lusb-1.0
 RM	=	rm -f
 CP	=	cp
 CHMOD	=	chmod

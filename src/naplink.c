@@ -33,10 +33,11 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/time.h>
+#include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
 #include <fcntl.h>
-#include <usb.h>
+#include <libusb-1.0/libusb.h>
 
 #include "packet.h"
 #include "pl2301.h"
@@ -51,10 +52,10 @@ char *commandBuffer = 0;
 int bail = 0;
 int benchmarking = 0;
 
-static int recv_and_process_packet(usb_dev_handle *hnd);
+static int recv_and_process_packet(libusb_device_handle *hnd);
 
 /* get return value from target */
-int get_return(usb_dev_handle *hnd, void *data)
+int get_return(libusb_device_handle *hnd, void *data)
 {
     packet_header_t ph;
     return_data_t *pb = 0;
@@ -79,7 +80,7 @@ int get_return(usb_dev_handle *hnd, void *data)
 }
 
 /* quit */
-int do_quit(usb_dev_handle *hnd)
+int do_quit(libusb_device_handle *hnd)
 {
     packet_header_t ph;
     
@@ -95,7 +96,7 @@ int do_quit(usb_dev_handle *hnd)
 }
 
 /* reset target */
-int do_reset(usb_dev_handle *hnd)
+int do_reset(libusb_device_handle *hnd)
 {
     packet_header_t ph;
     
@@ -109,7 +110,7 @@ int do_reset(usb_dev_handle *hnd)
 }
 
 /* execute ee elf on target */
-int do_execps2(usb_dev_handle *hnd, char *filename)
+int do_execps2(libusb_device_handle *hnd, char *filename)
 {
     packet_header_t ph;
 
@@ -126,7 +127,7 @@ int do_execps2(usb_dev_handle *hnd, char *filename)
 }
 
 /* execute iop irx on target */
-int do_execiop(usb_dev_handle *hnd, char *filename)
+int do_execiop(libusb_device_handle *hnd, char *filename)
 {
     packet_header_t ph;
 
@@ -143,7 +144,7 @@ int do_execiop(usb_dev_handle *hnd, char *filename)
 }
 
 /* send return value packet to target */
-void do_return(usb_dev_handle *hnd, int rv, void *data, int count)
+void do_return(libusb_device_handle *hnd, int rv, void *data, int count)
 {
     packet_header_t ph;
     return_data_t *pb;
@@ -164,7 +165,7 @@ void do_return(usb_dev_handle *hnd, int rv, void *data, int count)
 }
 
 /* perform a transfer rate test */
-void do_benchmark(usb_dev_handle *hnd)
+void do_benchmark(libusb_device_handle *hnd)
 {
     int i = 0;
     packet_header_t ph;
@@ -196,7 +197,7 @@ void do_benchmark(usb_dev_handle *hnd)
 }
 
 /* receive and process a packet from target */
-static int recv_and_process_packet(usb_dev_handle *hnd)
+static int recv_and_process_packet(libusb_device_handle *hnd)
 {
     char *buffer = 0;
     packet_header_t packet;
@@ -341,7 +342,7 @@ char *find_filename(char *buf)
 }
 
 /* handle usb i/o and stdin */
-void io_loop(usb_dev_handle * hnd)
+void io_loop(libusb_device_handle * hnd)
 {
     int rv;
     char buffer[300];
@@ -356,9 +357,9 @@ void io_loop(usb_dev_handle * hnd)
 	    
 	    seteuid(superuser);
 	    
-	    usb_reset(hnd);
-	    usb_set_configuration(hnd, 1);
-	    usb_claim_interface(hnd, 0);
+	    libusb_reset_device(hnd);
+	    libusb_set_configuration(hnd, 1);
+	    libusb_claim_interface(hnd, 0);
 	    
 	    seteuid(loseruser);
 
@@ -442,13 +443,11 @@ void io_loop(usb_dev_handle * hnd)
 
 int main(void)
 {
-  struct usb_bus *bus;
-  struct usb_device *dev;
+  struct libusb_device *pl_dev = NULL;
 
-  struct usb_bus *pl_bus = NULL;
-  struct usb_device *pl_dev = NULL;
-
-  usb_dev_handle * pl_hnd;
+  libusb_device_handle * pl_hnd = NULL;
+  ssize_t num_devices, i;
+  libusb_device **device_list;
 
   superuser = geteuid();
   loseruser = getuid();
@@ -460,45 +459,46 @@ int main(void)
 
   seteuid(superuser);
 
-  usb_init();
-  usb_find_busses();
-  usb_find_devices();
+  libusb_init(NULL);
+  num_devices = libusb_get_device_list(NULL, &device_list);
 
   seteuid(loseruser);
 
-  for (bus = usb_busses; bus; bus = bus->next) {
-      for (dev = bus->devices; dev; dev = dev->next)
-	  if (dev->descriptor.idVendor == PROLIFIC_VENDOR_ID) {
-	      switch (dev->descriptor.idProduct) {
-	      case PL2301_DEVICE_ID:
-		  printf("Found a PL2301\n");
-		  pl_bus = bus;
-		  pl_dev = dev;
-		  break;
-	      case PL2302_DEVICE_ID:
-		  printf("Found a PL2302\n");
-		  pl_bus = bus;
-		  pl_dev = dev;
-		  break;
-	      default:
-		  printf("Found an unknown Prolific device (id %d)\n", dev->descriptor.idProduct);
-		  break;
-	      }
-	  } else if (dev->descriptor.idVendor == BELKIN_VENDOR_ID) {
-	      switch (dev->descriptor.idProduct) {
-	      case BELKIN_VISTA_DEVICE_ID:
-		  printf ("Found a Belkin Vista\n");
-		  pl_bus = bus;
-		  pl_dev = dev;
-		  break;
-	      default:
-		  printf("Found an unknown Belkin device (id %d)\n", dev->descriptor.idProduct);
-		  break;
-	      }
+  for (i = 0; i < num_devices && pl_dev == NULL; i++) {
+      libusb_device *dev = device_list[i];
+      struct libusb_device_descriptor info;
+
+      libusb_get_device_descriptor(dev, &info);
+      if (info.idVendor == PROLIFIC_VENDOR_ID) {
+          switch (info.idProduct) {
+	  case PL2301_DEVICE_ID:
+	      printf("Found a PL2301\n");
+	      pl_dev = libusb_ref_device(dev);
+	      break;
+	  case PL2302_DEVICE_ID:
+	      printf("Found a PL2302\n");
+	      pl_dev = libusb_ref_device(dev);
+	      break;
+	  default:
+	      printf("Found an unknown Prolific device (id %d)\n", info.idProduct);
+	      break;
 	  }
+      } else if (info.idVendor == BELKIN_VENDOR_ID) {
+          switch (info.idProduct) {
+	  case BELKIN_VISTA_DEVICE_ID:
+	      printf ("Found a Belkin Vista\n");
+	      pl_dev = libusb_ref_device(dev);
+	      break;
+	  default:
+	      printf("Found an unknown Belkin device (id %d)\n", info.idProduct);
+	      break;
+	  }
+      }
   }
-  
-  if ((!pl_bus)||(!pl_dev)) {
+
+  libusb_free_device_list (device_list, 1);
+
+  if (!pl_dev) {
       printf("No supported devices detected.\n");
       exit(1);
   }
@@ -506,12 +506,12 @@ int main(void)
   seteuid(superuser);
 
 /* open device */
-  pl_hnd = usb_open(pl_dev);
+  libusb_open(pl_dev, &pl_hnd);
 
-  usb_reset(pl_hnd);
+  libusb_reset_device(pl_hnd);
 
-  usb_set_configuration(pl_hnd, 1);
-  usb_claim_interface(pl_hnd, 0);
+  libusb_set_configuration(pl_hnd, 1);
+  libusb_claim_interface(pl_hnd, 0);
 
   seteuid(loseruser);
 
@@ -534,8 +534,8 @@ int main(void)
   seteuid(superuser);
 
 /* close device */
-  usb_release_interface(pl_hnd, 0);
-  usb_close(pl_hnd);
+  libusb_release_interface(pl_hnd, 0);
+  libusb_close(pl_hnd);
 
   seteuid(loseruser);
 

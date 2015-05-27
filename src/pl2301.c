@@ -29,22 +29,23 @@
  *
  */
 
-#include <usb.h>
+#include <libusb-1.0/libusb.h>
 #include "pl2301.h"
 
 extern uid_t superuser;
 extern uid_t loseruser;
 
 /* check status of a quicklink feature */
-unsigned char CHECK_QLF(usb_dev_handle *hnd, int feature)
+unsigned char CHECK_QLF(libusb_device_handle *hnd, int feature)
 {
-    char blah = 0;
+    unsigned char blah = 0;
     int foo = -1;
+    int transferred;
 
     seteuid(superuser);
 
     while(foo == -1)
-	foo = usb_bulk_read(hnd, 0x81, &blah, 1, 10000);
+	foo = libusb_bulk_transfer(hnd, 0x81, &blah, 1, &transferred, 10000);
 
     seteuid(loseruser);
 
