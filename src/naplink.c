@@ -44,9 +44,6 @@
 
 /* #define DEBUG */
 
-uid_t superuser;
-uid_t loseruser;
-
 int commandWaiting = 0;
 char *commandBuffer = 0;
 int bail = 0;
@@ -354,14 +351,10 @@ void io_loop(libusb_device_handle * hnd)
 	/* check if peer is still there */
 	if (CHECK_QLF(hnd, PEER_E) == 0) {
 	    printf("peer went away\n");
-	    
-	    seteuid(superuser);
-	    
+
 	    libusb_reset_device(hnd);
 	    libusb_set_configuration(hnd, 1);
 	    libusb_claim_interface(hnd, 0);
-	    
-	    seteuid(loseruser);
 
             /* handshake */
 	    CLEAR_QLF(hnd, TX_REQ);
@@ -449,20 +442,11 @@ int main(void)
   ssize_t num_devices, i;
   libusb_device **device_list;
 
-  superuser = geteuid();
-  loseruser = getuid();
-
-  seteuid(loseruser);
-
   printf("NapLink Linux Client v1.0.1\n");
   printf("Coded by AndrewK of Napalm\n\n");
 
-  seteuid(superuser);
-
   libusb_init(NULL);
   num_devices = libusb_get_device_list(NULL, &device_list);
-
-  seteuid(loseruser);
 
   for (i = 0; i < num_devices && pl_dev == NULL; i++) {
       libusb_device *dev = device_list[i];
@@ -503,8 +487,6 @@ int main(void)
       exit(1);
   }
 
-  seteuid(superuser);
-
 /* open device */
   libusb_open(pl_dev, &pl_hnd);
 
@@ -515,8 +497,6 @@ int main(void)
 
   libusb_set_configuration(pl_hnd, 1);
   libusb_claim_interface(pl_hnd, 0);
-
-  seteuid(loseruser);
 
 /* handshake */
   CLEAR_QLF(pl_hnd, TX_REQ);
@@ -534,13 +514,9 @@ int main(void)
 /* tell peer we're going away */
   CLEAR_QLF(pl_hnd, PEER_E);
 
-  seteuid(superuser);
-
 /* close device */
   libusb_release_interface(pl_hnd, 0);
   libusb_close(pl_hnd);
-
-  seteuid(loseruser);
 
   return 0;
 }

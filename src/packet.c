@@ -35,9 +35,6 @@
 #include "packet.h"
 #include "pl2301.h"
 
-extern uid_t superuser;
-extern uid_t loseruser;
-
 /* #define DEBUG */
 
 /* receive a packet */
@@ -58,7 +55,6 @@ void recv_packet(libusb_device_handle *hnd, packet_header_t *ph, void **pb)
     printf("Receiving packet from PS2...\n");            
 #endif
 
-    seteuid(superuser);
     /* receive packet header */
     libusb_bulk_transfer(hnd, 0x83, (unsigned char *)ph, 8, &transferred, 10000);
 
@@ -66,8 +62,7 @@ void recv_packet(libusb_device_handle *hnd, packet_header_t *ph, void **pb)
     if (ph->size) {
 	*pb = malloc(ph->size);
 	libusb_bulk_transfer(hnd, 0x83, *pb, ph->size, &transferred, 10000);
-    }	
-    seteuid(loseruser);
+    }
 
 #ifdef DEBUG
     printf("Waiting for TX_C...\n");
@@ -110,13 +105,11 @@ void send_packet(libusb_device_handle *hnd, packet_header_t *ph, void *pb)
     printf("Sending packet to PS2...\n");                
 #endif
 
-    seteuid(superuser);
     /* send bulk */
     libusb_bulk_transfer(hnd, 0x02, (unsigned char *)ph, 8, &transferred, 10000);
 
     if (ph->size)
 	libusb_bulk_transfer(hnd, 0x02, pb, ph->size, &transferred, 10000);
-    seteuid(loseruser);
 
     /* set TX_C */
     SET_QLF(hnd, TX_C);

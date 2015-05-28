@@ -52,10 +52,10 @@
 #define S_EN      0x80 /* bit7 - Suspend Enable */
 
 /* clear a feature in quicklink features */
-#define CLEAR_QLF(hnd, feature) seteuid(superuser); while(libusb_control_transfer(hnd, LIBUSB_REQUEST_TYPE_VENDOR | LIBUSB_RECIPIENT_INTERFACE, LIBUSB_REQUEST_CLEAR_FEATURE, feature, 0, 0, 0, 10000) < 0); seteuid(loseruser);
+#define CLEAR_QLF(hnd, feature) while(libusb_control_transfer(hnd, LIBUSB_REQUEST_TYPE_VENDOR | LIBUSB_RECIPIENT_INTERFACE, LIBUSB_REQUEST_CLEAR_FEATURE, feature, 0, 0, 0, 10000) < 0);
 
 /* set a feature in quicklink features */
-#define SET_QLF(hnd, feature) seteuid(superuser); while(libusb_control_transfer(hnd, LIBUSB_REQUEST_TYPE_VENDOR | LIBUSB_RECIPIENT_INTERFACE, LIBUSB_REQUEST_SET_FEATURE, feature, 0, 0, 0, 10000) < 0); seteuid(loseruser);
+#define SET_QLF(hnd, feature) while(libusb_control_transfer(hnd, LIBUSB_REQUEST_TYPE_VENDOR | LIBUSB_RECIPIENT_INTERFACE, LIBUSB_REQUEST_SET_FEATURE, feature, 0, 0, 0, 10000) < 0);
 
 /* check status of a feature in quicklink features */
 unsigned char CHECK_QLF(libusb_device_handle *hnd, int feature);
