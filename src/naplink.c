@@ -472,11 +472,11 @@ int main(void)
       if (info.idVendor == PROLIFIC_VENDOR_ID) {
           switch (info.idProduct) {
 	  case PL2301_DEVICE_ID:
-	      printf("Found a PL2301\n");
+	      printf("Found a PL2301 (%d.%d)\n", libusb_get_bus_number(dev), libusb_get_port_number(dev));
 	      pl_dev = libusb_ref_device(dev);
 	      break;
 	  case PL2302_DEVICE_ID:
-	      printf("Found a PL2302\n");
+	      printf("Found a PL2302 (%d.%d)\n", libusb_get_bus_number(dev), libusb_get_port_number(dev));
 	      pl_dev = libusb_ref_device(dev);
 	      break;
 	  default:
@@ -486,7 +486,7 @@ int main(void)
       } else if (info.idVendor == BELKIN_VENDOR_ID) {
           switch (info.idProduct) {
 	  case BELKIN_VISTA_DEVICE_ID:
-	      printf ("Found a Belkin Vista\n");
+	      printf ("Found a Belkin Vista (%d.%d)\n", libusb_get_bus_number(dev), libusb_get_port_number(dev));
 	      pl_dev = libusb_ref_device(dev);
 	      break;
 	  default:
